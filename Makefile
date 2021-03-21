@@ -7,7 +7,7 @@ TARGETS="windows/amd64 windows/386 darwin/amd64"
 TARGETS_OLD="linux/amd64 linux/386"
 CGO=true
 
-include ../libbeat/scripts/Makefile
+include ./libbeat/scripts/Makefile
 
 .PHONY: with_pfring
 with_pfring:
