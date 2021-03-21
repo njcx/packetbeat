@@ -1,0 +1,3 @@
+package: packetbeat/metricbeat/module/postgresql
+import:
+- package: github.com/lib/pq
