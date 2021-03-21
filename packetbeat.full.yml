@@ -11,7 +11,7 @@
 
 # Select the network interface to sniff the data. You can use the "any"
 # keyword to sniff on all connected interfaces.
-packetbeat.interfaces.device: any
+packetbeat.interfaces.device: en0
 
 # Packetbeat supports three sniffer types:
 # * pcap, which uses the libpcap library and works on most platforms, but it's
@@ -530,7 +530,7 @@ packetbeat.protocols.nfs:
 # Multiple outputs may be used.
 
 #-------------------------- Elasticsearch output -------------------------------
-output.elasticsearch:
+#output.elasticsearch:
   # Boolean flag to enable or disable the output module.
   #enabled: true
 
@@ -538,7 +538,7 @@ output.elasticsearch:
   # Scheme and port can be left out and will be set to the default (http and 9200)
   # In case you specify and additional path, the scheme is required: http://localhost:9200/path
   # IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
-  hosts: ["localhost:9200"]
+#  hosts: ["localhost:9200"]
 
   # Set gzip compression level.
   #compression_level: 0
@@ -974,35 +974,35 @@ output.elasticsearch:
 
 #------------------------------- File output -----------------------------------
 #output.file:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+   #Boolean flag to enable or disable the output module.
+#  enabled: true
 
   # Path to the directory where to save the generated files. The option is
   # mandatory.
-  #path: "/tmp/packetbeat"
+#  path: "/tmp/packetbeat"
 
   # Name of the generated files. The default is `packetbeat` and it generates
   # files: `packetbeat`, `packetbeat.1`, `packetbeat.2`, etc.
-  #filename: packetbeat
+#  filename: packetbeat
 
   # Maximum size in kilobytes of each file. When this size is reached, and on
   # every packetbeat restart, the files are rotated. The default value is 10240
   # kB.
-  #rotate_every_kb: 10000
+#  rotate_every_kb: 10000
 
   # Maximum number of files under path. When this number of files is reached,
   # the oldest file is deleted and the rest are shifted from last to first. The
   # default is 7 files.
-  #number_of_files: 7
+#  number_of_files: 7
 
 
 #----------------------------- Console output ---------------------------------
-#output.console:
+output.console:
   # Boolean flag to enable or disable the output module.
-  #enabled: true
+  enabled: true
 
   # Pretty print json event
-  #pretty: false
+  pretty: false
 
 #================================= Paths ======================================
 

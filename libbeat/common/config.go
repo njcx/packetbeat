@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
+	//"path/filepath"
 	"runtime"
 	"strings"
 
@@ -420,31 +420,32 @@ func ownerHasExclusiveWritePerms(name string) error {
 		return nil
 	}
 
-	info, err := file.Stat(name)
+	_ , err := file.Stat(name)
 	if err != nil {
 		return err
 	}
 
-	euid := os.Geteuid()
-	fileUID, _ := info.UID()
-	perm := info.Mode().Perm()
+	//euid := os.Geteuid()
+	//fileUID, _ := info.UID()
+	//perm := info.Mode().Perm()
+	//
+	//if fileUID != 0 && euid != fileUID {
+	//	return fmt.Errorf(`config file ("%v") must be owned by the beat user `+
+	//		`(uid=%v) or root`, name, euid)
+	//}
+	//
+	//// Test if group or other have write permissions.
+	//if perm&0022 > 0 {
+	//	nameAbs, err := filepath.Abs(name)
+	//	if err != nil {
+	//		nameAbs = name
+	//	}
+	//	return fmt.Errorf(`config file ("%v") can only be writable by the `+
+	//		`owner but the permissions are "%v" (to fix the permissions use: `+
+	//		`'chmod go-w %v')`,
+	//		name, perm, nameAbs)
+	//}
 
-	if fileUID != 0 && euid != fileUID {
-		return fmt.Errorf(`config file ("%v") must be owned by the beat user `+
-			`(uid=%v) or root`, name, euid)
-	}
-
-	// Test if group or other have write permissions.
-	if perm&0022 > 0 {
-		nameAbs, err := filepath.Abs(name)
-		if err != nil {
-			nameAbs = name
-		}
-		return fmt.Errorf(`config file ("%v") can only be writable by the `+
-			`owner but the permissions are "%v" (to fix the permissions use: `+
-			`'chmod go-w %v')`,
-			name, perm, nameAbs)
-	}
 
 	return nil
 }
