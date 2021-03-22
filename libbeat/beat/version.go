@@ -1,3 +1,3 @@
 package beat
 
-const defaultBeatVersion = "5.6.17"
+const defaultBeatVersion = "nids-5.6.17"
