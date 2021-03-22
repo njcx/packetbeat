@@ -33,10 +33,14 @@ packetbeat.protocols.icmp:
 packetbeat.protocols.amqp:
   # Configure the ports where to listen for AMQP traffic. You can disable
   # the AMQP protocol by commenting out the list of ports.
+  enabled: false
+
   ports: [5672]
 
 packetbeat.protocols.cassandra:
   #Cassandra port for traffic monitoring.
+
+  enabled: false
   ports: [9042]
 
 packetbeat.protocols.dns:
@@ -58,6 +62,7 @@ packetbeat.protocols.http:
   ports: [80, 8080, 8000, 5000, 8002]
 
 packetbeat.protocols.memcache:
+  enabled: false
   # Configure the ports where to listen for memcache traffic. You can disable
   # the Memcache protocol by commenting out the list of ports.
   ports: [11211]
@@ -65,31 +70,37 @@ packetbeat.protocols.memcache:
 packetbeat.protocols.mysql:
   # Configure the ports where to listen for MySQL traffic. You can disable
   # the MySQL protocol by commenting out the list of ports.
+  enabled: true
   ports: [3306]
 
 packetbeat.protocols.pgsql:
   # Configure the ports where to listen for Pgsql traffic. You can disable
   # the Pgsql protocol by commenting out the list of ports.
+  enabled: false
   ports: [5432]
 
 packetbeat.protocols.redis:
   # Configure the ports where to listen for Redis traffic. You can disable
   # the Redis protocol by commenting out the list of ports.
+  enabled: false
   ports: [6379]
 
 packetbeat.protocols.thrift:
   # Configure the ports where to listen for Thrift-RPC traffic. You can disable
   # the Thrift-RPC protocol by commenting out the list of ports.
+  enabled: false
   ports: [9090]
 
 packetbeat.protocols.mongodb:
   # Configure the ports where to listen for MongoDB traffic. You can disable
   # the MongoDB protocol by commenting out the list of ports.
+  enabled: false
   ports: [27017]
 
 packetbeat.protocols.nfs:
   # Configure the ports where to listen for NFS traffic. You can disable
   # the NFS protocol by commenting out the list of ports.
+  enabled: false
   ports: [2049]
 
 #================================ General =====================================
@@ -113,9 +124,9 @@ packetbeat.protocols.nfs:
 # Multiple outputs may be used.
 
 #-------------------------- Elasticsearch output ------------------------------
-output.elasticsearch:
+#output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["localhost:9200"]
+#  hosts: ["localhost:9200"]
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
@@ -147,3 +158,30 @@ output.elasticsearch:
 # To enable all selectors use ["*"]. Examples of other selectors are "beat",
 # "publish", "service".
 #logging.selectors: ["*"]
+
+
+output.file:
+   #Boolean flag to enable or disable the output module.
+  enabled: true
+
+  # Path to the directory where to save the generated files. The option is
+  # mandatory.
+  path: "/tmp/packetbeat"
+
+  # Name of the generated files. The default is `packetbeat` and it generates
+  # files: `packetbeat`, `packetbeat.1`, `packetbeat.2`, etc.
+  filename: packetbeat
+
+  # Maximum size in kilobytes of each file. When this size is reached, and on
+  # every packetbeat restart, the files are rotated. The default value is 10240
+  # kB.
+  rotate_every_kb: 10000
+
+  # Maximum number of files under path. When this number of files is reached,
+  # the oldest file is deleted and the rest are shifted from last to first. The
+  # default is 7 files.
+  number_of_files: 7
+
+
+logging.to_files: true
+logging.files:
