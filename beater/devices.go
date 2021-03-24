@@ -6,7 +6,6 @@ import (
 	"runtime"
 
 	"packetbeat/libbeat/beat"
-
 	"packetbeat/sniffer"
 )
 

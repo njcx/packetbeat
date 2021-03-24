@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"packetbeat/libbeat/logp"
+
 	"packetbeat/flows"
+
 	"packetbeat/protos"
 	"packetbeat/protos/icmp"
 	"packetbeat/protos/tcp"

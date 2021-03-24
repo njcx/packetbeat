@@ -23,6 +23,9 @@ type TCPPlugin interface {
 	Plugin
 
 	// Called when TCP payload data is available for parsing.
+
+	// 依次是：Parse() 解析Packet，ReceivedFin()处理TCP断开连接，
+	// GapInStream()处理空包丢包，ConnectionTimeout()超时时间；
 	Parse(pkt *Packet, tcptuple *common.TCPTuple,
 		dir uint8, private ProtocolData) ProtocolData
 

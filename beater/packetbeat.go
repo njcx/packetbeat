@@ -11,6 +11,7 @@ import (
 	"packetbeat/libbeat/common/droppriv"
 	"packetbeat/libbeat/logp"
 	"packetbeat/libbeat/service"
+
 	"github.com/tsg/gopacket/layers"
 
 	"packetbeat/config"

@@ -19,6 +19,7 @@ import (
 	_ "packetbeat/protos/nfs"
 	_ "packetbeat/protos/pgsql"
 	_ "packetbeat/protos/redis"
+	_ "packetbeat/protos/ssh"
 	_ "packetbeat/protos/tcp"
 	_ "packetbeat/protos/thrift"
 	_ "packetbeat/protos/udp"
