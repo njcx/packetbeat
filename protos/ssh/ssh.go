@@ -118,16 +118,13 @@ func (ssh *sshPlugin) Parse(
 	return conn
 }
 
-func (redis *redisPlugin) GapInStream(tcptuple *common.TCPTuple, dir uint8,
+func (ssh *sshPlugin) GapInStream(tcptuple *common.TCPTuple, dir uint8,
 	nbytes int, private protos.ProtocolData) (priv protos.ProtocolData, drop bool) {
-
-	// tsg: being packet loss tolerant is probably not very useful for Redis,
-	// because most requests/response tend to fit in a single packet.
 
 	return private, true
 }
 
-func (redis *redisPlugin) ReceivedFin(tcptuple *common.TCPTuple, dir uint8,
+func (ssh *sshPlugin) ReceivedFin(tcptuple *common.TCPTuple, dir uint8,
 	private protos.ProtocolData) protos.ProtocolData {
 
 	// TODO: check if we have pending data that we can send up the stack
