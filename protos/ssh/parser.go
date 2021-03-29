@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"packetbeat/libbeat/common/streambuf"
@@ -21,6 +22,7 @@ type parserConfig struct {
 }
 
 type message struct {
+	ts time.Time
 	applayer.Message
 
 	// indicator for parsed message being complete or requires more messages
@@ -60,9 +62,12 @@ func (p *parser) append(data []byte) error {
 }
 
 func (p *parser) feed(ts time.Time, data []byte) error {
+
 	if err := p.append(data); err != nil {
 		return err
 	}
+
+	//fmt.Println(string(data))
 
 	for p.buf.Total() > 0 {
 		if p.message == nil {
@@ -100,5 +105,10 @@ func (p *parser) newMessage(ts time.Time) *message {
 }
 
 func (p *parser) parse() (*message, error) {
-	return nil, errors.New("TODO: implement me")
+
+	//fmt.Println(string(p.buf.data))
+
+	return nil, nil
+
+	//return nil, errors.New("TODO: implement me")
 }

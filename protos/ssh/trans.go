@@ -24,7 +24,6 @@ type transactionConfig struct {
 
 type transactionHandler func(requ, resp *message) error
 
-// List of messages available for correlation
 type messageList struct {
 	head, tail *message
 }
@@ -35,14 +34,14 @@ func (trans *transactions) init(c *transactionConfig, cb transactionHandler) {
 }
 
 func (trans *transactions) onMessage(
-	tuple *common.IpPortTuple,
+	tuple *common.IPPortTuple,
 	dir uint8,
 	msg *message,
 ) error {
 	var err error
 
 	msg.Tuple = *tuple
-	msg.Transport = applayer.TransportTcp
+	msg.Transport = applayer.TransportTCP
 	msg.CmdlineTuple = procs.ProcWatcher.FindProcessesTuple(&msg.Tuple)
 
 	if msg.IsRequest {
@@ -63,7 +62,7 @@ func (trans *transactions) onMessage(
 // onRequest handles request messages, merging with incomplete requests
 // and adding non-merged requests into the correlation list.
 func (trans *transactions) onRequest(
-	tuple *common.IpPortTuple,
+	tuple *common.IPPortTuple,
 	dir uint8,
 	msg *message,
 ) error {
@@ -95,7 +94,7 @@ func (trans *transactions) onRequest(
 // onRequest handles response messages, merging with incomplete requests
 // and adding non-merged responses into the correlation list.
 func (trans *transactions) onResponse(
-	tuple *common.IpPortTuple,
+	tuple *common.IPPortTuple,
 	dir uint8,
 	msg *message,
 ) error {
@@ -175,4 +174,29 @@ func (ml *messageList) append(msg *message) {
 	}
 	msg.next = nil
 	ml.tail = msg
+}
+
+func (ml *messageList) empty() bool {
+	return ml.head == nil
+}
+
+func (ml *messageList) pop() *message {
+	if ml.head == nil {
+		return nil
+	}
+
+	msg := ml.head
+	ml.head = ml.head.next
+	if ml.head == nil {
+		ml.tail = nil
+	}
+	return msg
+}
+
+func (ml *messageList) first() *message {
+	return ml.head
+}
+
+func (ml *messageList) last() *message {
+	return ml.tail
 }

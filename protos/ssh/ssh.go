@@ -1,43 +1,40 @@
 package ssh
 
 import (
-	"expvar"
 	"time"
 
 	"packetbeat/libbeat/common"
 	"packetbeat/libbeat/logp"
+	"packetbeat/protos/tcp"
 
 	"packetbeat/protos"
-	"packetbeat/protos/tcp"
 	"packetbeat/publish"
 )
 
+// sshPlugin application level protocol analyzer plugin
 type sshPlugin struct {
-	ports              []int
-	sendRequest        bool
-	sendResponse       bool
-	transactionTimeout time.Duration
-	results            publish.Transactions
+	ports        protos.PortsConfig
+	parserConfig parserConfig
+	transConfig  transactionConfig
+	pub          transPub
 }
 
+// Application Layer tcp stream data to be stored on tcp connection context.
 type connection struct {
-	streams   [2]*stream
-	requests  messageList
-	responses messageList
+	streams [2]*stream
+	trans   transactions
 }
 
+// Uni-directioal tcp stream state for parsing messages.
 type stream struct {
-	applayer.Stream
-	parser   parser
-	tcptuple *common.TCPTuple
+	parser parser
 }
 
 var (
-	unmatchedResponses = expvar.NewInt("ssh.unmatched_responses")
-)
+	debugf = logp.MakeDebug("ssh")
 
-var (
-	debugf  = logp.MakeDebug("ssh")
+	// use isDebug/isDetailed to guard debugf/detailedf to minimize allocations
+	// (garbage collection) when debug log is disabled.
 	isDebug = false
 )
 
@@ -45,6 +42,7 @@ func init() {
 	protos.Register("ssh", New)
 }
 
+// New create and initializes a new ssh protocol analyzer instance.
 func New(
 	testMode bool,
 	results publish.Transactions,
@@ -68,7 +66,7 @@ func (ssh *sshPlugin) init(results publish.Transactions, config *sshConfig) erro
 	if err := ssh.setFromConfig(config); err != nil {
 		return err
 	}
-	ssh.results = results
+	ssh.pub.results = results
 
 	isDebug = logp.IsDebug("ssh")
 	return nil
@@ -77,35 +75,54 @@ func (ssh *sshPlugin) init(results publish.Transactions, config *sshConfig) erro
 func (ssh *sshPlugin) setFromConfig(config *sshConfig) error {
 
 	// set module configuration
-	ssh.ports = config.Ports
-	ssh.sendRequest = config.SendRequest
-	ssh.sendResponse = config.SendResponse
-	ssh.transactionTimeout = config.TransactionTimeout
+	if err := ssh.ports.Set(config.Ports); err != nil {
+		return err
+	}
+
+	// set parser configuration
+
+	parser := &ssh.parserConfig
+	parser.maxBytes = tcp.TCPMaxDataInStream
+
+	// set transaction correlator configuration
+	trans := &ssh.transConfig
+	trans.transactionTimeout = config.TransactionTimeout
+
+	// set transaction publisher configuration
+	pub := &ssh.pub
+	pub.sendRequest = config.SendRequest
+	pub.sendResponse = config.SendResponse
 
 	return nil
 }
 
+// ConnectionTimeout returns the per stream connection timeout.
+// Return <=0 to set default tcp module transaction timeout.
 func (ssh *sshPlugin) ConnectionTimeout() time.Duration {
-	return ssh.transactionTimeout
+	return ssh.transConfig.transactionTimeout
 }
 
+// GetPorts returns the ports numbers packets shall be processed for.
 func (ssh *sshPlugin) GetPorts() []int {
-	return ssh.ports
+	return ssh.ports.Ports
 }
 
+// Parse processes a TCP packet. Return nil if connection
+// state shall be dropped (e.g. parser not in sync with tcp stream)
 func (ssh *sshPlugin) Parse(
 	pkt *protos.Packet,
-	tcptuple *common.TcpTuple, dir uint8,
+	tcptuple *common.TCPTuple, dir uint8,
 	private protos.ProtocolData,
 ) protos.ProtocolData {
 	defer logp.Recover("Parse sshPlugin exception")
 
 	conn := ssh.ensureConnection(private)
 	st := conn.streams[dir]
+
 	if st == nil {
 		st = &stream{}
 		st.parser.init(&ssh.parserConfig, func(msg *message) error {
-			return conn.trans.onMessage(tcptuple.IpPort(), dir, msg)
+			return conn.trans.onMessage(tcptuple.IPPort(), dir, msg)
 		})
 		conn.streams[dir] = st
 	}
@@ -115,21 +132,29 @@ func (ssh *sshPlugin) Parse(
 		ssh.onDropConnection(conn)
 		return nil
 	}
+
 	return conn
 }
 
-func (ssh *sshPlugin) GapInStream(tcptuple *common.TCPTuple, dir uint8,
-	nbytes int, private protos.ProtocolData) (priv protos.ProtocolData, drop bool) {
-
-	return private, true
+// ReceivedFin handles TCP-FIN packet.
+func (ssh *sshPlugin) ReceivedFin(
+	tcptuple *common.TCPTuple, dir uint8,
+	private protos.ProtocolData,
+) protos.ProtocolData {
+	return private
 }
 
-func (ssh *sshPlugin) ReceivedFin(tcptuple *common.TCPTuple, dir uint8,
-	private protos.ProtocolData) protos.ProtocolData {
+// GapInStream handles lost packets in tcp-stream.
+func (ssh *sshPlugin) GapInStream(tcptuple *common.TCPTuple, dir uint8,
+	nbytes int,
+	private protos.ProtocolData,
+) (protos.ProtocolData, bool) {
+	conn := getConnection(private)
+	if conn != nil {
+		ssh.onDropConnection(conn)
+	}
 
-	// TODO: check if we have pending data that we can send up the stack
-
-	return private
+	return nil, true
 }
 
 // onDropConnection processes and optionally sends incomplete
@@ -157,38 +182,14 @@ func getConnection(private protos.ProtocolData) *connection {
 	}
 
 	priv, ok := private.(*connection)
+
 	if !ok {
-		logp.Warn("{{ cookiecutter.module }} connection type error")
+		logp.Warn("ssh connection type error")
 		return nil
 	}
 	if priv == nil {
-		logp.Warn("Unexpected: {{ cookiecutter.module }} connection data not set")
+		logp.Warn("Unexpected: ssh connection data not set")
 		return nil
 	}
 	return priv
-}
-
-func (ml *messageList) empty() bool {
-	return ml.head == nil
-}
-
-func (ml *messageList) pop() *message {
-	if ml.head == nil {
-		return nil
-	}
-
-	msg := ml.head
-	ml.head = ml.head.next
-	if ml.head == nil {
-		ml.tail = nil
-	}
-	return msg
-}
-
-func (ml *messageList) first() *message {
-	return ml.head
-}
-
-func (ml *messageList) last() *message {
-	return ml.tail
 }

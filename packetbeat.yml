@@ -104,7 +104,7 @@ packetbeat.protocols.nfs:
   ports: [2049]
 
 packetbeat.protocols.ssh:
-  enabled: true
+    enabled: true
     # Configure the ports where to listen for SSH traffic. You can disable
     # the SSH protocol by commenting out the list of ports.
     ports: [22]
