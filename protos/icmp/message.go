@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"time"
 
-	"packetbeat/libbeat/logp"
 	"github.com/tsg/gopacket/layers"
+	"packetbeat/libbeat/logp"
 )
 
 // TODO: more types (that are not provided as constants in gopacket)
@@ -59,10 +59,11 @@ var icmp6PairTypes = map[uint8]bool{
 
 // Contains all used information from the ICMP message on the wire.
 type icmpMessage struct {
-	ts     time.Time
-	Type   uint8
-	code   uint8
-	length int
+	ts        time.Time
+	Type      uint8
+	code      uint8
+	length    int
+	baselayer layers.BaseLayer
 }
 
 func isRequest(tuple *icmpTuple, msg *icmpMessage) bool {

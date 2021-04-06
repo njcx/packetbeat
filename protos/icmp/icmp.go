@@ -121,10 +121,11 @@ func (icmp *icmpPlugin) ProcessICMPv4(
 		seq:         seq,
 	}
 	msg := &icmpMessage{
-		ts:     pkt.Ts,
-		Type:   typ,
-		code:   code,
-		length: len(icmp4.BaseLayer.Payload),
+		ts:        pkt.Ts,
+		Type:      typ,
+		code:      code,
+		length:    len(icmp4.BaseLayer.Payload),
+		baselayer: icmp4.BaseLayer,
 	}
 
 	if isRequest(tuple, msg) {
@@ -268,7 +269,6 @@ func (icmp *icmpPlugin) publishTransaction(trans *icmpTransaction) {
 
 	event := common.MapStr{}
 
-	// common fields - group "env"
 	event["client_ip"] = trans.tuple.srcIP
 	event["ip"] = trans.tuple.dstIP
 
@@ -276,8 +276,10 @@ func (icmp *icmpPlugin) publishTransaction(trans *icmpTransaction) {
 	event["@timestamp"] = common.Time(trans.ts) // timestamp of the first packet
 	event["type"] = "icmp"                      // protocol name
 	event["path"] = trans.tuple.dstIP           // what is requested (dst ip)
+	var HasErr = false
 	if trans.HasError() {
 		event["status"] = common.ERROR_STATUS
+		HasErr = true
 	} else {
 		event["status"] = common.OK_STATUS
 	}
@@ -307,7 +309,6 @@ func (icmp *icmpPlugin) publishTransaction(trans *icmpTransaction) {
 		}
 	}
 
-	// event fields - group "icmp"
 	icmpEvent := common.MapStr{}
 	event["icmp"] = icmpEvent
 
@@ -321,10 +322,11 @@ func (icmp *icmpPlugin) publishTransaction(trans *icmpTransaction) {
 		request["type"] = trans.request.Type
 		request["code"] = trans.request.code
 
-		// TODO: Add more info. The IPv4/IPv6 payload could be interesting.
-		// if icmp.SendRequest {
-		//     request["payload"] = ""
-		// }
+		if HasErr {
+			request["payload"] = ""
+		} else {
+			request["payload"] = BytesToString(trans.request.baselayer.Payload[8:])
+		}
 	}
 
 	if trans.response != nil {
@@ -335,11 +337,25 @@ func (icmp *icmpPlugin) publishTransaction(trans *icmpTransaction) {
 		response["type"] = trans.response.Type
 		response["code"] = trans.response.code
 
-		// TODO: Add more info. The IPv4/IPv6 payload could be interesting.
-		// if icmp.SendResponse {
-		//     response["payload"] = ""
-		// }
+		if HasErr {
+			response["payload"] = ""
+		} else {
+			response["payload"] = BytesToString(trans.response.baselayer.Payload[8:])
+		}
 	}
 
 	icmp.results.PublishTransaction(event)
+}
+
+func BytesToString(b []byte) string {
+
+	if len(b) > 0 {
+		for k, v := range b {
+			if v >= 127 || 32 > v {
+				b[k] = 46
+			}
+		}
+		return string(b)
+	}
+	return ""
 }

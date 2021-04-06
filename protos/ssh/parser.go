@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"packetbeat/libbeat/common/streambuf"
