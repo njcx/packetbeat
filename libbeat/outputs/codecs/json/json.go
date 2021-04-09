@@ -1,6 +1,7 @@
 package json
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"packetbeat/libbeat/common"
@@ -42,13 +43,36 @@ func (e *Encoder) Encode(event common.MapStr) ([]byte, error) {
 	var serializedEvent []byte
 
 	if e.Pretty {
-		serializedEvent, err = json.MarshalIndent(event, "", "  ")
+		serializedEvent, err = DisableEscapeHtmlMarshalIndent(event, "", "  ")
 	} else {
-		serializedEvent, err = json.Marshal(event)
+		serializedEvent, err = DisableEscapeHtmlMarshal(event)
 	}
 	if err != nil {
 		logp.Err("Fail to convert the event to JSON (%v): %#v", err, event)
 	}
 
 	return serializedEvent, err
+}
+
+func DisableEscapeHtmlMarshal(data interface{}) ([]byte, error) {
+	bf := bytes.NewBuffer([]byte{})
+	jsonEncoder := json.NewEncoder(bf)
+	jsonEncoder.SetEscapeHTML(false)
+	if err := jsonEncoder.Encode(data); err != nil {
+		return []byte{}, err
+	}
+	return bf.Bytes(), nil
+}
+
+func DisableEscapeHtmlMarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
+	b, err := DisableEscapeHtmlMarshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = json.Indent(&buf, b, prefix, indent)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }

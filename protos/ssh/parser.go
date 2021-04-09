@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"packetbeat/libbeat/common/streambuf"
@@ -105,7 +106,7 @@ func (p *parser) newMessage(ts time.Time) *message {
 
 func (p *parser) parse() (*message, error) {
 
-	//fmt.Println(string(p.buf.data))
+	fmt.Println(p.buf)
 
 	return nil, nil
 
