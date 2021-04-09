@@ -1,0 +1,223 @@
+
+# Select the network interface to sniff the data. On Linux, you can use the
+# "any" keyword to sniff on all connected interfaces.
+packetbeat.interfaces.device: en0
+packetbeat.interfaces.snaplen: 1614
+packetbeat.interfaces.type: pf_ring
+
+
+#================================== Flows =====================================
+
+# Set `enabled: false` or comment out all options to disable flows reporting.
+packetbeat.flows:
+  # Set network flow timeout. Flow is killed if no packet is received before being
+  # timed out.
+  timeout: 30s
+
+  # Configure reporting period. If set to -1, only killed flows will be reported
+  period: 10s
+
+#========================== Transaction protocols =============================
+
+packetbeat.protocols.icmp:
+  # Enable ICMPv4 and ICMPv6 monitoring. Default: false
+  enabled: true
+
+packetbeat.protocols.amqp:
+  # Configure the ports where to listen for AMQP traffic. You can disable
+  # the AMQP protocol by commenting out the list of ports.
+  enabled: false
+
+  ports: [5672]
+
+packetbeat.protocols.cassandra:
+  #Cassandra port for traffic monitoring.
+
+  enabled: false
+  ports: [9042]
+
+packetbeat.protocols.dns:
+  # Configure the ports where to listen for DNS traffic. You can disable
+  # the DNS protocol by commenting out the list of ports.
+  enabled: true
+  ports: [53]
+
+  # include_authorities controls whether or not the dns.authorities field
+  # (authority resource records) is added to messages.
+  include_authorities: true
+
+  # include_additionals controls whether or not the dns.additionals field
+  # (additional resource records) is added to messages.
+  include_additionals: true
+
+  send_request:  true
+  send_response: true
+
+  # Transaction timeout. Expired transactions will no longer be correlated to
+  # incoming responses, but sent to Elasticsearch immediately.
+  transaction_timeout: 10s
+
+packetbeat.protocols.http:
+  # Configure the ports where to listen for HTTP traffic. You can disable
+  # the HTTP protocol by commenting out the list of ports.
+  ports: [80, 8080, 8000, 5000, 8002,39000, 111, 12400, 16500, 20600, 24700, 28800, 2181, 37000, 15042, 9240, 10400, 10401, 18600, 22700, 15389, 26800, 15048, 35000, 12500, 16600, 20700, 33000, 6379, 9257, 10500, 18700, 20750, 22800, 26900, 10520, 35100, 15067, 12600, 16700, 33100, 6479, 10600, 18800, 14706, 14708, 10302, 27000, 31100, 40000, 14726, 12700, 16800, 25000, 29100, 33200, 23338, 10700, 14200, 18900, 27100, 9980, 12800, 15104, 16900, 19201, 21000, 29200, 25112, 25113, 25114, 25115, 12830, 12831, 10800, 23101, 27200, 12900, 21100, 625, 29300, 33400, 19080, 19090, 10900, 10901, 15000, 19100, 15006, 15007, 23200, 38000, 15020, 15021, 6830, 39600, 15027, 15028, 15029, 15040, 15041, 6850, 15043, 15044, 15045, 15046, 15047, 13000, 15049, 17100, 8910, 15061, 15062, 15063, 15064, 15065, 15066, 731, 15068, 15080, 15081, 15082, 15086, 15087, 15088, 15089, 11000, 25338, 15100, 15101, 15102, 15103, 19200, 15105, 15106, 15107, 23300, 31500, 15149, 15120, 15122, 15123, 15125, 15126, 15128, 23333, 15143, 23336, 15146, 13100, 13101, 17200, 21300, 15160, 15161, 15162, 15163, 15164, 15165, 13120, 37700, 37701, 37702, 37703, 37704, 37705, 37706, 37707, 15187, 7000, 11100, 11101, 15200, 15201, 19300, 19301, 15206, 15207, 15209, 15220, 15222, 39800, 15225, 15226, 15228, 37760, 9090, 17290, 15246, 15247, 13200, 15249, 7058, 17300, 17301, 25500, 15261, 15262, 15263, 29600, 15265, 15266, 15267, 7077, 37804, 943, 15280, 7100, 3006, 11200, 11201, 15301, 19400, 15307, 23500, 15309, 29650, 37850, 15324, 15326, 15329, 9190, 15342, 15343, 9200, 15345, 13300, 13301, 17400, 9210, 21500, 29700, 15365, 15368, 15369, 15380, 15381, 15384, 1049, 15386, 15388, 9245, 11300, 11301, 15401, 7210, 19500, 9261, 15407, 15408, 27700, 29750, 9271, 7230, 15424, 15425, 15441, 7250, 13400, 13401, 17500, 15460, 15461, 15462, 15463, 29800, 42089, 7280, 7290, 15484, 15485, 15487, 15489, 7300, 11400, 15500, 15503, 19600, 36000, 15526, 15527, 15528, 17578, 15541, 15542, 15543, 15545, 15546, 13500, 17600, 19650, 21700, 29900, 15567, 34000, 15224, 38100, 7400, 18300, 11500, 1261, 15602, 19700, 29950, 36100, 13600, 17700, 30000, 34100, 38200, 7500, 11600, 19800, 7055, 23900, 7056, 32100, 7057, 13700, 30085, 17800, 26000, 30100, 34200, 38300, 11700, 32181, 19900, 24000, 28100, 28101, 19910, 32200, 19920, 19930, 19940, 13800, 19950, 26100, 19960, 38400, 19970, 19980, 7700, 19990, 11800, 15900, 20000, 37808, 24100, 28201, 20010, 32300, 13900, 18000, 20050, 22100, 22101, 22103, 22107, 22109, 38500, 7800, 11900, 16000, 20100, 20101, 24200, 32400, 31000, 18080, 18081, 18083, 18090, 18091, 18092, 18093, 14000, 18100, 18101, 18103, 22201, 22203, 22205, 22207, 38600, 15308, 7900, 12000, 16100, 20200, 20201, 32500, 26301, 10000, 14100, 14101, 18200, 22300, 15322, 30500, 38700, 13201, 10030, 12100, 16200, 16201, 16202, 20300, 20301, 8030, 10080, 10090, 10100, 10101, 10102, 10103, 8056, 14201, 8060, 18301, 22400, 22402, 22403, 26500, 22405, 8070, 8080, 8081, 8090, 15344, 38800, 8100, 12200, 16300, 16301, 16302, 20400, 24500, 15008, 2004, 10200, 10201, 10202, 10203, 14301, 18400, 22500, 26600, 38900, 8190]
+
+  send_headers: true
+  send_all_headers: true
+  split_cookie: false
+  decode_body: true
+  #send_request: true
+  #send_response: true
+  #real_ip_header: "X-Real-IP"
+  include_body_for: ["text/html","application/json","application/xml","multipart/form-data"]
+  #send_response: true
+  transaction_timeout: 10s
+  max_message_size: 10485760
+
+
+
+
+
+packetbeat.protocols.memcache:
+  enabled: false
+  # Configure the ports where to listen for memcache traffic. You can disable
+  # the Memcache protocol by commenting out the list of ports.
+  ports: [11211]
+
+packetbeat.protocols.mysql:
+  # Configure the ports where to listen for MySQL traffic. You can disable
+  # the MySQL protocol by commenting out the list of ports.
+  enabled: true
+  ports: [3305,3306,3307,3308]
+
+packetbeat.protocols.pgsql:
+  # Configure the ports where to listen for Pgsql traffic. You can disable
+  # the Pgsql protocol by commenting out the list of ports.
+  enabled: false
+  ports: [5432]
+
+packetbeat.protocols.redis:
+  # Configure the ports where to listen for Redis traffic. You can disable
+  # the Redis protocol by commenting out the list of ports.
+  enabled: true
+  ports: [6379]
+
+  transaction_timeout: 10s
+
+packetbeat.protocols.thrift:
+  # Configure the ports where to listen for Thrift-RPC traffic. You can disable
+  # the Thrift-RPC protocol by commenting out the list of ports.
+  enabled: false
+  ports: [9090]
+
+packetbeat.protocols.mongodb:
+  # Configure the ports where to listen for MongoDB traffic. You can disable
+  # the MongoDB protocol by commenting out the list of ports.
+  enabled: false
+  ports: [27017]
+
+packetbeat.protocols.nfs:
+  # Configure the ports where to listen for NFS traffic. You can disable
+  # the NFS protocol by commenting out the list of ports.
+  enabled: false
+  ports: [2049]
+
+packetbeat.protocols.ssh:
+  enabled: true
+  # Configure the ports where to listen for SSH traffic. You can disable
+  # the SSH protocol by commenting out the list of ports.
+  ports: [22]
+
+  #================================ General =====================================
+
+  # The name of the shipper that publishes the network data. It can be used to group
+  # all the transactions sent by a single shipper in the web interface.
+  #name:
+
+  # The tags of the shipper are included in their own field with each
+  # transaction published.
+  #tags: ["service-X", "web-tier"]
+
+  # Optional fields that you can specify to add additional information to the
+  # output.
+  #fields:
+  #  env: staging
+
+
+
+  #================================ Outputs =====================================
+
+  # Configure what outputs to use when sending the data collected by the beat.
+  # Multiple outputs may be used.
+
+  #-------------------------- Elasticsearch output ------------------------------
+  #output.elasticsearch:
+  # Array of hosts to connect to.
+  #  hosts: ["localhost:9200"]
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+  #----------------------------- Logstash output --------------------------------
+  #output.logstash:
+  # The Logstash hosts
+  #hosts: ["localhost:5044"]
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+
+  # Certificate for SSL client authentication
+  #ssl.certificate: "/etc/pki/client/cert.pem"
+
+  # Client Certificate Key
+  #ssl.key: "/etc/pki/client/cert.key"
+
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: critical, error, warning, info, debug
+#logging.level: debug
+
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+#logging.selectors: ["*"]
+
+
+#output.file:
+#  enabled: true
+#  path: "/tmp/packetbeat"
+#  filename: packetbeat
+#  rotate_every_kb: 10000
+#  number_of_files: 7
+
+
+output.kafka:
+  # initial brokers for reading cluster metadata
+  hosts: ["172.21.129.2:9092"]
+
+  # message topic selection + partitioning
+  topic: 'nids-%{[type]}'
+
+
+logging.to_files: true
+logging.files:
+
+  path: /tmp
+
+  # The name of the files where the logs are written to.
+  name: packetbeat.log
+
+  # Configure log file size limit. If limit is reached, log file will be
+  # automatically rotated
+  rotateeverybytes: 10485760 # = 10MB
+
+  # Number of rotated log files to keep. Oldest files will be deleted first.
+  keepfiles: 7
+
+  # The permissions mask to apply when rotating log files. The default value is 0600.
+  # Must be a valid Unix-style file permissions mask expressed in octal notation.
+  permissions: 0600
